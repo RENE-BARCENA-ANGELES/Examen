@@ -1,0 +1,40 @@
+services:
+  db:
+    image: postgres:16
+    restart: "no"
+    environment:
+      POSTGRES_DB: blog_tec
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: 123455asdasd
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - blog_tec
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d blog_tec"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    image: ex_u1_22590434
+    restart: "no"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+psycopg://admin:123455asdasd@db:5432/blog_tec
+    ports:
+      - "5000:5000"
+    networks:
+      - blog_tec
+
+volumes:
+  postgres_data:
+
+networks:
+  blog_tec:
+    name: blog_tec
